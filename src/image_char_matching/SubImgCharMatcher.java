@@ -1,34 +1,40 @@
 package image_char_matching;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 public class SubImgCharMatcher {
     //fields
-    private TreeMap<Double, Set<Character>> treeMap; //TODO return to private!
+    private TreeMap<Double, Set<Character>> charBrightness; //TODO return to private!
     private double max_brightness, min_brightness;
 
     public SubImgCharMatcher(char[] charset) {
         max_brightness = 0;
         min_brightness = 1;
-        treeMap = new TreeMap<>();
+        charBrightness = new TreeMap<>();
         for (char c: charset) {
             addChar(c);
         }
     }
 
+    public Set<Character> getChars(){
+        Set<Character> allChars = new TreeSet<>();  // treeSet in order to return chars in their ascii
+        // order
+        for (Set<Character> chars: charBrightness.values()){
+            allChars.addAll(chars);
+        }
+        return allChars;
+    }
+
     public char getCharByImageBrightness(double brightness) {
         double correctedBrightness = correctBrightness(brightness);
         Double closestKey = findClosestKey(correctedBrightness);
-        Set<Character> set = treeMap.get(closestKey);
+        Set<Character> set = charBrightness.get(closestKey);
         return Collections.min(set);
     }
 
     private Double findClosestKey(double brightness) {
-        Double floorKey = treeMap.floorKey(brightness);
-        Double ceilingKey = treeMap.ceilingKey(brightness);
+        Double floorKey = charBrightness.floorKey(brightness);
+        Double ceilingKey = charBrightness.ceilingKey(brightness);
 
         if (floorKey == null) {
             return ceilingKey;
@@ -63,29 +69,29 @@ public class SubImgCharMatcher {
         if (charBrightness < min_brightness) {
             min_brightness = charBrightness;
         }
-        if (treeMap.containsKey(charBrightness)) {
-            treeMap.get(charBrightness).add(c);
+        if (this.charBrightness.containsKey(charBrightness)) {
+            this.charBrightness.get(charBrightness).add(c);
         }
         else {
             // If the key doesn't exist, create a new set and add the character to it
             Set<Character> charSet = new HashSet<>();
             charSet.add(c);
-            treeMap.put(charBrightness, charSet);
+            this.charBrightness.put(charBrightness, charSet);
         }
     }
 
     public void removeChar(char c) {
         double charBrightness = determineBrightnessValue(c);
-        if (treeMap.containsKey(charBrightness)) {
-            Set<Character> charSet = treeMap.get(charBrightness);
+        if (this.charBrightness.containsKey(charBrightness)) {
+            Set<Character> charSet = this.charBrightness.get(charBrightness);
             charSet.remove(c);
             if (charSet.isEmpty()) {
-                treeMap.remove(charBrightness);
+                this.charBrightness.remove(charBrightness);
                 if(charBrightness == min_brightness) {
-                    min_brightness = treeMap.firstKey();
+                    min_brightness = this.charBrightness.firstKey();
                 }
                 if(charBrightness == max_brightness) {
-                    max_brightness = treeMap.lastKey();
+                    max_brightness = this.charBrightness.lastKey();
                 }
             }
         }
