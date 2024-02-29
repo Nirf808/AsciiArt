@@ -29,16 +29,15 @@ public class Shell {
     private static final String EMPTY_CHARS_ERR = " Did not execute. Charset is empty.";
 
     private static final char[] DEFAULT_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    private static final String IMAGE_NAME = "cat.jpeg";
+    private static final String DEFAULT_IMAGE_NAME = "cat.jpeg";
     private static final int DEFAULT_RESOLUTION = 128;
     private static final int FIRST_PRINTABLE_CHAR = 32;
-    private static final int LAST_PRINTABLE_CHAR = 132;
+    private static final int LAST_PRINTABLE_CHAR = 126;
 
-    private AsciiOutput CONSOLE = new ConsoleAsciiOutput(); //single instance of console output
-    private AsciiOutput HTML = new HtmlAsciiOutput("out.html", "Courier New"); // single instance of html
-    // output
+    private final AsciiOutput CONSOLE = new ConsoleAsciiOutput(); //single instance of console output
+    private final AsciiOutput HTML = new HtmlAsciiOutput("out.html", "Courier New"); // single instance of
+    // html output
     private SubImgCharMatcher chars;
-    private String imageName = IMAGE_NAME;
     private int resolution = DEFAULT_RESOLUTION;
     private Image image;
     private boolean imageChanged;
@@ -50,43 +49,50 @@ public class Shell {
         imageAsAscii = null;
         lastRunResolution = 0;
         imageChanged = true;
-        output = CONSOLE; // todo: is this the right default?
+        output = CONSOLE;
         chars = new SubImgCharMatcher(DEFAULT_CHARS);
         try {
-            image = new Image(imageName);
+            image = new Image(DEFAULT_IMAGE_NAME);
         }
         catch (IOException e){
-            System.out.println("impossibe");
+            System.out.println("cannot load default image");
         }
     }
 
     public void run(){
+        System.out.print(">>> ");
         String userInput = KeyboardInput.readLine();
         while (notExit(userInput)){
             String[] commandAndArgs = userInput.split(" ");
             String command = commandAndArgs[0];
-            switch (command){
-                case CHARS:
-                    printChars();
-                    break;
-                case ADD:
-                    changeChar(commandAndArgs, chars::addChar, ADD_ERR_MSG);
-                    break;
-                case REMOVE:
-                    changeChar(commandAndArgs, chars::removeChar, REMOVE_ERR_MSG);
-                case RES:
-                    changeResolution(commandAndArgs);
-                    break;
-                case IMAGE:
-                    changeImage(commandAndArgs);
-                    break;
-                case OUTPUT:
-                    changeOutput(commandAndArgs);
-                    break;
-                case ASCII_ART:
-                    runAlgorithm();
-                    break;
+            try {
+                switch (command){
+                    case CHARS:
+                        printChars();
+                        break;
+                    case ADD:
+                        changeChar(commandAndArgs, chars::addChar, ADD_ERR_MSG);
+                        break;
+                    case REMOVE:
+                        changeChar(commandAndArgs, chars::removeChar, REMOVE_ERR_MSG);
+                    case RES:
+                        changeResolution(commandAndArgs);
+                        break;
+                    case IMAGE:
+                        changeImage(commandAndArgs);
+                        break;
+                    case OUTPUT:
+                        changeOutput(commandAndArgs);
+                        break;
+                    case ASCII_ART:
+                        runAlgorithm();
+                        break;
+                }
             }
+            catch (IllegalArgumentException | IllegalStateException e){
+                System.out.println(e.getMessage());
+            }
+            System.out.print(">>> ");
             userInput = KeyboardInput.readLine();
         }
     }
@@ -99,12 +105,12 @@ public class Shell {
         for (char c: chars.getChars()){
             System.out.print(c + " ");
         }
+        System.out.println();
     }
 
-    private void changeChar(String[] args, Consumer<Character> f, String err_msg) {
+    private void changeChar(String[] args, Consumer<Character> f, String err_msg) throws IllegalArgumentException {
         if (args.length != 2) {
-            System.out.println(err_msg);
-            return;
+            throw new IllegalArgumentException(err_msg);
         }
 
         String arg = args[1];
@@ -144,10 +150,10 @@ public class Shell {
         return chars;
     }
 
-    private void changeResolution(String[] args){
+    private void changeResolution(String[] args) throws IllegalArgumentException{
         if (args.length != 2 || (!args[1].equals("up") && !args[1].equals("down"))){
-            System.out.println(RES_INCORRECT_FORMAT);
-            return;
+            throw new IllegalArgumentException(RES_INCORRECT_FORMAT);
+
         }
         switch (args[1]){
             case "up":
@@ -172,10 +178,9 @@ public class Shell {
         return Math.max(1, image.getWidth() / image.getHeight());
     }
 
-    private void changeImage(String[] args){
+    private void changeImage(String[] args) throws IllegalArgumentException{
         if (args.length != 2){
-            System.out.println(IMAGE_ERR); //todo: this message is not the right one
-            return;
+            throw new IllegalArgumentException(IMAGE_ERR);
         }
         String path = args[1];
         try {
@@ -188,10 +193,9 @@ public class Shell {
         }
     }
 
-    private void changeOutput(String[] args){
+    private void changeOutput(String[] args) throws IllegalArgumentException{
         if (args.length != 2 || (!args[1].equals("html") && !args[1].equals("console"))){
-            System.out.println(OUTPUT_ERR); //todo: this message is not the right one
-            return;
+            throw new IllegalArgumentException(OUTPUT_ERR);
         }
         switch (args[1]){
             case "console":
@@ -203,10 +207,9 @@ public class Shell {
         }
     }
 
-    private void runAlgorithm(){
+    private void runAlgorithm() throws IllegalStateException{
         if (chars.getChars().isEmpty()){
-            System.out.println(EMPTY_CHARS_ERR);
-            return;
+            throw new IllegalStateException(EMPTY_CHARS_ERR);
         }
 
         if (imageChanged || resChanged()){
