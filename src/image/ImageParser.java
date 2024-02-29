@@ -2,41 +2,64 @@ package image;
 
 import java.awt.*;
 
+/**
+ * Utility class for parsing and manipulating images.
+ */
 public class ImageParser {
 
-    public static final int MAX_GRAY_VAL = 255;
+    private static final int MAX_GRAY_VAL = 255;
 
+    /**
+     * Pads the given image to make its dimensions powers of 2.
+     *
+     * @param image the original image to pad
+     * @return the padded image
+     */
     public static Image padImage(Image image) {
         int newHeight = (int) Math.pow(2, (int) Math.ceil(Math.log(image.getHeight()) / Math.log(2)));
         int newWidth = (int) Math.pow(2, (int) Math.ceil(Math.log(image.getWidth()) / Math.log(2)));
+
         int heightMargin = (newHeight - image.getHeight()) / 2;
         int widthMargin = (newWidth - image.getWidth()) / 2;
+
         Color[][] colors = new Color[newHeight][newWidth];
+
         for (int row = 0; row < newHeight; row++) {
             for (int col = 0; col < newWidth; col++) {
-                if(row < heightMargin || row >= image.getHeight() + heightMargin) {
+                if (row < heightMargin || row >= image.getHeight() + heightMargin ||
+                        col < widthMargin || col >= image.getWidth() + widthMargin) {
                     colors[row][col] = Color.WHITE;
-                } else if (col < widthMargin || col >= image.getWidth() + widthMargin) {
-                    colors[row][col] = Color.WHITE;
-                } else{
+                } else {
                     colors[row][col] = image.getPixel(row - heightMargin, col - widthMargin);
                 }
             }
         }
+
         return new Image(colors, newWidth, newHeight);
     }
 
+    /**
+     * Divides the given image into smaller sub-images and calculates the average grayscale value
+     * for each sub-image.
+     *
+     * @param image the image to divide
+     * @param resolution the number of sub-images per dimension
+     * @return a 2D array containing the grayscale values of the sub-images
+     */
     public static double[][] getImageParts(Image image, int resolution) {
         double[][] subImagesGrayScale = new double[resolution][resolution];
         int subImageSize = image.getWidth() / resolution;
-        for (int startRow = 0; startRow < image.getHeight(); startRow += subImageSize){
-            for (int startCol = 0; startCol < image.getWidth(); startCol += subImageSize){
+
+        for (int startRow = 0; startRow < image.getHeight(); startRow += subImageSize) {
+            for (int startCol = 0; startCol < image.getWidth(); startCol += subImageSize) {
                 subImagesGrayScale[startRow / subImageSize][startCol / subImageSize] =
                         getSubImageGrayScale(image, subImageSize, startRow, startCol);
             }
         }
+
         return subImagesGrayScale;
     }
+
 
     private static double getSubImageGrayScale(Image image, int subImageSize, int startRow, int startCol) {
         double totalGrayness = 0;

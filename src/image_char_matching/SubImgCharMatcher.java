@@ -27,6 +27,23 @@ public class SubImgCharMatcher {
     }
 
     /**
+     * Retrieves all characters.
+     * Characters are returned in ascending ASCII order.
+     *
+     * @return an ordered set of the characters
+     */
+    public Set<Character> getChars() {
+        // Create a TreeSet to store characters in ascending ASCII order
+        Set<Character> allChars = new TreeSet<>();
+        for (PriorityQueue<Character> chars : charsBrightness.values()) {
+            allChars.addAll(chars);
+        }
+        return allChars;
+    }
+
+
+
+    /**
      * Finds the char with the closest brightness to a given value.
      * @param brightness value between 0 and 1
      * @return a char in the set that best represent the brightness value.
