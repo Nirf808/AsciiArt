@@ -39,8 +39,9 @@ public class Shell {
     private static final int FIRST_PRINTABLE_CHAR = 32;
     private static final int LAST_PRINTABLE_CHAR = 126;
 
-    private final AsciiOutput CONSOLE = new ConsoleAsciiOutput(); //single instance of console output
-    private final AsciiOutput HTML = new HtmlAsciiOutput("out.html", "Courier New"); // single instance of
+    private final AsciiOutput CONSOLE_OUTPUT = new ConsoleAsciiOutput(); //single instance of console output
+    private final AsciiOutput HTML_OUTPUT = new HtmlAsciiOutput("out.html", "Courier New"); // single
+    // instance of
     // html output
     private SubImgCharMatcher chars;
     private int resolution = DEFAULT_RESOLUTION;
@@ -58,7 +59,7 @@ public class Shell {
         imageAsAscii = null;
         lastRunResolution = 0;
         imageChanged = true;
-        output = CONSOLE;
+        output = CONSOLE_OUTPUT;
         chars = new SubImgCharMatcher(DEFAULT_CHARS);
         try {
             image = new Image(DEFAULT_IMAGE_NAME);
@@ -90,6 +91,7 @@ public class Shell {
                         break;
                     case REMOVE:
                         changeChar(commandAndArgs, chars::removeChar, REMOVE_ERR_MSG);
+                        break;
                     case RES:
                         changeResolution(commandAndArgs);
                         break;
@@ -144,7 +146,7 @@ public class Shell {
                     return;
                 }
                 if (rangeOfCharsValidFormat(arg)) {
-                    for (int i = arg.charAt(0); i < arg.charAt(2); i++) {
+                    for (int i = arg.charAt(0); i <= arg.charAt(2); i++) {
                         f.accept((char) i);
                     }
                 }
@@ -201,11 +203,17 @@ public class Shell {
         try {
             image = new Image(path);
             imageChanged = true;
-            resolution = DEFAULT_RESOLUTION; //return to default when an image is changed
+            resolution = chooseNewImageResolution(image); //return to default
+            // (or max if smaller than default) when an image is changed
         }
         catch (IOException e){
             System.out.println(IMAGE_ERR);
         }
+    }
+
+    private int chooseNewImageResolution(Image image){
+        int maxImageRes = Math.min(image.getWidth(), image.getHeight());
+        return Math.min(DEFAULT_RESOLUTION, maxImageRes);
     }
 
     private void changeOutput(String[] args) throws IllegalArgumentException{
@@ -214,10 +222,10 @@ public class Shell {
         }
         switch (args[1]){
             case "console":
-                output = CONSOLE;
+                output = CONSOLE_OUTPUT;
                 break;
             case "html":
-                output = HTML;
+                output = HTML_OUTPUT;
                 break;
         }
     }
@@ -230,11 +238,12 @@ public class Shell {
         if (imageChanged || resChanged()){
             AsciiArtAlgorithm asciiArtAlgorithm = new AsciiArtAlgorithm(image, resolution, chars);
             imageAsAscii = asciiArtAlgorithm.run();
-            output.out(imageAsAscii);
 
             lastRunResolution = resolution;
             imageChanged = false;
         }
+        output.out(imageAsAscii);
+
     }
 
     private boolean resChanged(){
