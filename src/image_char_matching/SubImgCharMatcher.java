@@ -26,14 +26,21 @@ public class SubImgCharMatcher {
         }
     }
 
-    public Set<Character> getChars(){
-        Set<Character> allChars = new TreeSet<>();  // treeSet in order to return chars in their ascii
-        // order
-        for (PriorityQueue<Character> chars: charsBrightness.values()){
+    /**
+     * Retrieves all characters.
+     * Characters are returned in ascending ASCII order.
+     *
+     * @return an ordered set of the characters
+     */
+    public Set<Character> getChars() {
+        // Create a TreeSet to store characters in ascending ASCII order
+        Set<Character> allChars = new TreeSet<>();
+        for (PriorityQueue<Character> chars : charsBrightness.values()) {
             allChars.addAll(chars);
         }
         return allChars;
     }
+
 
 
     /**
