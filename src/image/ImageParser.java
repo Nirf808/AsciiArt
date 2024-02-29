@@ -9,14 +9,17 @@ public class ImageParser {
     public static Image padImage(Image image) {
         int newHeight = (int) Math.pow(2, (int) Math.ceil(Math.log(image.getHeight()) / Math.log(2)));
         int newWidth = (int) Math.pow(2, (int) Math.ceil(Math.log(image.getWidth()) / Math.log(2)));
+        int heightMargin = (newHeight - image.getHeight()) / 2;
+        int widthMargin = (newWidth - image.getWidth()) / 2;
         Color[][] colors = new Color[newHeight][newWidth];
         for (int row = 0; row < newHeight; row++) {
             for (int col = 0; col < newWidth; col++) {
-                if (row < image.getHeight() && col < image.getWidth()) {
-                    Color original = image.getPixel(row, col);
-                    colors[row][col] = new Color(original.getRGB());
-                } else {
+                if(row < heightMargin || row >= image.getHeight() + heightMargin) {
                     colors[row][col] = Color.WHITE;
+                } else if (col < widthMargin || col >= image.getWidth() + widthMargin) {
+                    colors[row][col] = Color.WHITE;
+                } else{
+                    colors[row][col] = image.getPixel(row - heightMargin, col - widthMargin);
                 }
             }
         }
