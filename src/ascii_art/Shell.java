@@ -181,6 +181,7 @@ public class Shell {
         try {
             image = new Image(path);
             imageChanged = true;
+            resolution = DEFAULT_RESOLUTION; //return to default when an image is changed
         }
         catch (IOException e){
             System.out.println(IMAGE_ERR);
@@ -212,8 +213,10 @@ public class Shell {
             AsciiArtAlgorithm asciiArtAlgorithm = new AsciiArtAlgorithm(image, resolution, chars);
             imageAsAscii = asciiArtAlgorithm.run();
             output.out(imageAsAscii);
+
+            lastRunResolution = resolution;
+            imageChanged = false;
         }
-        output.out(imageAsAscii);
     }
 
     private boolean resChanged(){
