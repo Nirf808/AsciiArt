@@ -26,8 +26,8 @@ public class ImageParser {
     public static double[][] getImageParts(Image image, int resolution) {
         double[][] subImagesGrayScale = new double[resolution][resolution];
         int subImageSize = image.getWidth() / resolution;
-        for (int startRow = 0; startRow < image.getHeight() - subImageSize; startRow += subImageSize){
-            for (int startCol = 0; startCol < image.getWidth() - subImageSize; startCol += subImageSize){
+        for (int startRow = 0; startRow < image.getHeight(); startRow += subImageSize){
+            for (int startCol = 0; startCol < image.getWidth(); startCol += subImageSize){
                 subImagesGrayScale[startRow / subImageSize][startCol / subImageSize] =
                         getSubImageGrayScale(image, subImageSize, startRow, startCol);
             }
