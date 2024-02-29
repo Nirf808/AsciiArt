@@ -9,6 +9,11 @@ import image_char_matching.SubImgCharMatcher;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+/**
+ * The Shell class represents a command-line shell for interacting with ASCII art generation functionalities.
+ * It allows users to perform various operations such as changing characters used for rendering, adjusting image resolution,
+ * loading different images, selecting output formats, and generating ASCII art from images.
+ */
 public class Shell {
     private static final String EXIT = "exit";
     private static final String CHARS = "chars";
@@ -45,6 +50,10 @@ public class Shell {
     private int lastRunResolution;
     private char[][] imageAsAscii;
 
+    /**
+     * Constructs a new Shell instance with default settings.
+     * It initializes the image, character set, and output method.
+     */
     public Shell(){
         imageAsAscii = null;
         lastRunResolution = 0;
@@ -59,6 +68,12 @@ public class Shell {
         }
     }
 
+    /**
+     * Runs the shell, allowing users to interact with ASCII art generation functionalities through command-line inputs.
+     * It reads user input until the 'exit' command is entered.
+     * Supports commands for displaying characters, adding or removing characters from the character set,
+     * changing image resolution, loading different images, selecting output formats, and generating ASCII art from images.
+     */
     public void run(){
         System.out.print(">>> ");
         String userInput = KeyboardInput.readLine();
@@ -226,6 +241,10 @@ public class Shell {
        return lastRunResolution != resolution;
     }
 
+    /**
+     * Entry point to start the ASCII art shell application.
+     * @param args the command-line arguments (not used)
+     */
     public static void main(String[] args) {
         Shell shell = new Shell();
         shell.run();
