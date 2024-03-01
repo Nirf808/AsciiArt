@@ -4,6 +4,7 @@ import ascii_output.AsciiOutput;
 import ascii_output.ConsoleAsciiOutput;
 import ascii_output.HtmlAsciiOutput;
 import image.Image;
+import image.ImageParser;
 import image_char_matching.SubImgCharMatcher;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class Shell {
     private static final String IMAGE_ERR = "Did not execute due to problem with image file.";
     private static final String OUTPUT_ERR = "Did not change output method due to incorrect format.";
     private static final String EMPTY_CHARS_ERR = " Did not execute. Charset is empty.";
+    private static final String COMMAND_NOT_FOUND_ERR = "Did not execute due to incorrect command.";
 
     private static final char[] DEFAULT_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     private static final String DEFAULT_IMAGE_NAME = "cat.jpeg";
@@ -104,6 +106,9 @@ public class Shell {
                     case ASCII_ART:
                         runAlgorithm();
                         break;
+                    default:
+                        System.out.println(COMMAND_NOT_FOUND_ERR);
+                        break;
                 }
             }
             catch (IllegalArgumentException | IllegalStateException e){
@@ -149,7 +154,9 @@ public class Shell {
                     for (int i = arg.charAt(0); i <= arg.charAt(2); i++) {
                         f.accept((char) i);
                     }
+                    return;
                 }
+                System.out.println(err_msg);
         }
     }
 
@@ -173,7 +180,7 @@ public class Shell {
         }
         switch (args[1]){
             case "up":
-                if (2 * resolution > image.getWidth() || 2 * resolution > image.getHeight()){
+                if (2 * resolution > imageWidth() || 2 * resolution > imageHeight()){
                     System.out.println(RES_EXCEEDED_BOUNDARIES);
                     return;
                 }
@@ -191,7 +198,7 @@ public class Shell {
     }
 
     private int getMinCharsInRow(){
-        return Math.max(1, image.getWidth() / image.getHeight());
+        return Math.max(1, imageWidth() / imageHeight());
     }
 
     private void changeImage(String[] args) throws IllegalArgumentException{
@@ -202,7 +209,7 @@ public class Shell {
         try {
             image = new Image(path);
             imageChanged = true;
-            resolution = chooseNewImageResolution(image); //return to default
+            resolution = chooseNewImageResolution(); //return to default
             // (or max if smaller than default) when an image is changed
         }
         catch (IOException e){
@@ -210,9 +217,17 @@ public class Shell {
         }
     }
 
-    private int chooseNewImageResolution(Image image){
-        int maxImageRes = Math.min(image.getWidth(), image.getHeight());
+    private int chooseNewImageResolution(){
+        int maxImageRes = Math.min(imageWidth(), imageHeight());
         return Math.min(DEFAULT_RESOLUTION, maxImageRes);
+    }
+
+    private int imageHeight(){
+        return ImageParser.getPaddedImageSize(image)[0];
+    }
+
+    private int imageWidth(){
+        return ImageParser.getPaddedImageSize(image)[1];
     }
 
     private void changeOutput(String[] args) throws IllegalArgumentException{
