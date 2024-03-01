@@ -8,7 +8,7 @@ import java.util.*;
  */
 public class SubImgCharMatcher {
     //fields
-    private final TreeMap<Double, PriorityQueue<Character>> charsBrightness;
+    private final TreeMap<Double, TreeSet<Character>> charsBrightness;
     private double max_brightness, min_brightness;
 
     /**
@@ -35,7 +35,7 @@ public class SubImgCharMatcher {
     public Set<Character> getChars() {
         // Create a TreeSet to store characters in ascending ASCII order
         Set<Character> allChars = new TreeSet<>();
-        for (PriorityQueue<Character> chars : charsBrightness.values()) {
+        for (Set<Character> chars : charsBrightness.values()) {
             allChars.addAll(chars);
         }
         return allChars;
@@ -53,9 +53,11 @@ public class SubImgCharMatcher {
         double correctedBrightness = correctBrightness(brightness);
         Double closestKey = findClosestKey(correctedBrightness);
         //finds the best char with this brightness
-        PriorityQueue<Character> minHeap = charsBrightness.get(closestKey);
-        //can throw NullPointerException but we assume it's never empty
-        return minHeap.peek();
+        TreeSet<Character> tree = charsBrightness.get(closestKey);
+        //can throw NullPointerException but we assume it's never
+
+//        return minHeap.peek();
+        return tree.first();
     }
 
     /**
@@ -116,9 +118,9 @@ public class SubImgCharMatcher {
         }
         else {
             // If the key doesn't exist, create a new priority queue and adds the character to it
-            PriorityQueue<Character> characterPriorityQueue = new PriorityQueue<>();
-            characterPriorityQueue.add(c);
-            charsBrightness.put(charBrightness, characterPriorityQueue);
+            TreeSet<Character> charsTree = new TreeSet<>();
+            charsTree.add(c);
+            charsBrightness.put(charBrightness, charsTree);
         }
     }
 
@@ -129,9 +131,9 @@ public class SubImgCharMatcher {
     public void removeChar(char c) {
         double charBrightness = determineBrightnessValue(c);
         if (charsBrightness.containsKey(charBrightness)) {
-            PriorityQueue<Character> charPriorityQueue = charsBrightness.get(charBrightness);
-            charPriorityQueue.remove(c);
-            if (charPriorityQueue.isEmpty()) {
+            TreeSet<Character> charTree = charsBrightness.get(charBrightness);
+            charTree.remove(c);
+            if (charTree.isEmpty()) {
                 charsBrightness.remove(charBrightness);
                 //checks if min or max need to be updated
                 if(charBrightness == min_brightness) {
