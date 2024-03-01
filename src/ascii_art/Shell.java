@@ -116,7 +116,7 @@ public class Shell {
                         System.out.println(COMMAND_NOT_FOUND_ERR);
                         break;
                 }
-            } catch (IllegalArgumentException | IllegalStateException e) {
+            } catch (IllegalArgumentException | IllegalStateException | IOException e) {
                 System.out.println(e.getMessage());
             }
             System.out.print(">>> ");
@@ -161,7 +161,7 @@ public class Shell {
                     }
                     return;
                 }
-                System.out.println(err_msg);
+                throw new IllegalArgumentException(err_msg);
         }
     }
 
@@ -186,15 +186,13 @@ public class Shell {
         switch (args[1]) {
             case "up":
                 if (2 * resolution > imageWidth() || 2 * resolution > imageHeight()) {
-                    System.out.println(RES_EXCEEDED_BOUNDARIES);
-                    return;
+                    throw new IllegalArgumentException(RES_EXCEEDED_BOUNDARIES);
                 }
                 resolution *= 2;
                 break;
             case "down":
                 if (resolution / 2 < getMinCharsInRow()) {
-                    System.out.println(RES_EXCEEDED_BOUNDARIES);
-                    return;
+                    throw new IllegalArgumentException(RES_EXCEEDED_BOUNDARIES);
                 }
                 resolution /= 2;
                 break;
@@ -206,7 +204,7 @@ public class Shell {
         return Math.max(1, imageWidth() / imageHeight());
     }
 
-    private void changeImage(String[] args) throws IllegalArgumentException {
+    private void changeImage(String[] args) throws IllegalArgumentException, IOException {
         if (args.length != 2) {
             throw new IllegalArgumentException(IMAGE_ERR);
         }
@@ -217,7 +215,7 @@ public class Shell {
             resolution = chooseNewImageResolution(); //return to default
             // (or max if smaller than default) when an image is changed
         } catch (IOException e) {
-            System.out.println(IMAGE_ERR);
+            throw new IOException(IMAGE_ERR);
         }
     }
 
