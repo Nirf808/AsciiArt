@@ -156,7 +156,9 @@ public class Shell {
                     return;
                 }
                 if (rangeOfCharsValidFormat(arg)) {
-                    for (int i = arg.charAt(0); i <= arg.charAt(2); i++) {
+                    int from = Math.min(arg.charAt(0), arg.charAt(2));
+                    int to = Math.max(arg.charAt(0), arg.charAt(2));
+                    for (int i = from; i <= to; i++) {
                         f.accept((char) i);
                     }
                     return;
@@ -167,8 +169,7 @@ public class Shell {
 
 
     private boolean rangeOfCharsValidFormat(String arg) {
-        return arg.length() == 3 && arg.charAt(1) == '-'
-                && arg.charAt(2) > arg.charAt(0);
+        return arg.length() == 3 && arg.charAt(1) == '-';
     }
 
     private char[] getAllPossibleChars() {
