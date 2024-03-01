@@ -8,6 +8,7 @@ import image.ImageParser;
 import image_char_matching.SubImgCharMatcher;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -45,24 +46,28 @@ public class Shell {
     private final AsciiOutput HTML_OUTPUT = new HtmlAsciiOutput("out.html", "Courier New"); // single
     // instance of
     // html output
-    private SubImgCharMatcher chars;
+    private SubImgCharMatcher charMatcher;
     private int resolution = DEFAULT_RESOLUTION;
     private Image image;
     private boolean imageChanged;
     private AsciiOutput output;
     private int lastRunResolution;
     private char[][] imageAsAscii;
+    private AsciiArtAlgorithm asciiArtAlgorithm;
+    private Set<Character> lastUsedChars;
 
     /**
      * Constructs a new Shell instance with default settings.
      * It initializes the image, character set, and output method.
      */
     public Shell(){
+        lastUsedChars = null;
+        asciiArtAlgorithm = null;
         imageAsAscii = null;
         lastRunResolution = 0;
         imageChanged = true;
         output = CONSOLE_OUTPUT;
-        chars = new SubImgCharMatcher(DEFAULT_CHARS);
+        charMatcher = new SubImgCharMatcher(DEFAULT_CHARS);
         try {
             image = new Image(DEFAULT_IMAGE_NAME);
         }
@@ -89,10 +94,10 @@ public class Shell {
                         printChars();
                         break;
                     case ADD:
-                        changeChar(commandAndArgs, chars::addChar, ADD_ERR_MSG);
+                        changeChar(commandAndArgs, charMatcher::addChar, ADD_ERR_MSG);
                         break;
                     case REMOVE:
-                        changeChar(commandAndArgs, chars::removeChar, REMOVE_ERR_MSG);
+                        changeChar(commandAndArgs, charMatcher::removeChar, REMOVE_ERR_MSG);
                         break;
                     case RES:
                         changeResolution(commandAndArgs);
@@ -124,7 +129,7 @@ public class Shell {
     }
 
     private void printChars(){
-        for (char c: chars.getChars()){
+        for (char c: charMatcher.getChars()){
             System.out.print(c + " ");
         }
         System.out.println();
@@ -245,19 +250,29 @@ public class Shell {
     }
 
     private void runAlgorithm() throws IllegalStateException{
-        if (chars.getChars().isEmpty()){
+        if (charMatcher.getChars().isEmpty()){
             throw new IllegalStateException(EMPTY_CHARS_ERR);
         }
 
         if (imageChanged || resChanged()){
-            AsciiArtAlgorithm asciiArtAlgorithm = new AsciiArtAlgorithm(image, resolution, chars);
+            asciiArtAlgorithm = new AsciiArtAlgorithm(image, resolution, charMatcher);
             imageAsAscii = asciiArtAlgorithm.run();
 
             lastRunResolution = resolution;
             imageChanged = false;
+            lastUsedChars = charMatcher.getChars();
+        }
+        else {
+            if (charsChanged()) {
+                imageAsAscii = asciiArtAlgorithm.run();
+                lastUsedChars = charMatcher.getChars();
+            }
         }
         output.out(imageAsAscii);
+    }
 
+    private boolean charsChanged(){
+        return !charMatcher.getChars().equals(lastUsedChars);
     }
 
     private boolean resChanged(){
