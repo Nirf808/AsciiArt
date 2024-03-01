@@ -26,7 +26,7 @@ public class AsciiArtAlgorithm {
         image = ImageParser.padImage(image);
 
         // Initialize fields
-        this.image = ImageParser.getImageParts(image, resolution);
+        this.image = ImageParser.extractSubImageGrayscale(image, resolution);
         // Stores the resolution used for ASCII art conversion
         this.matcher = matcher;
     }

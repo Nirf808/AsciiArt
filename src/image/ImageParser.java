@@ -16,8 +16,8 @@ public class ImageParser {
      * @return the padded image
      */
     public static Image padImage(Image image) {
-        int newHeight = (int) Math.pow(2, (int) Math.ceil(Math.log(image.getHeight()) / Math.log(2)));
-        int newWidth = (int) Math.pow(2, (int) Math.ceil(Math.log(image.getWidth()) / Math.log(2)));
+        int newHeight = getPaddedImageSize(image)[0];
+        int newWidth = getPaddedImageSize(image)[1];
 
         int heightMargin = (newHeight - image.getHeight()) / 2;
         int widthMargin = (newWidth - image.getWidth()) / 2;
@@ -39,6 +39,18 @@ public class ImageParser {
     }
 
     /**
+     * Calculates the padded dimensions of an image to make them powers of 2.
+     *
+     * @param image the original image
+     * @return an array containing the padded height ([0]) and width ([1]) of the image
+     */
+    public static int[] getPaddedImageSize(Image image){
+        int newHeight = (int) Math.pow(2, (int) Math.ceil(Math.log(image.getHeight()) / Math.log(2)));
+        int newWidth = (int) Math.pow(2, (int) Math.ceil(Math.log(image.getWidth()) / Math.log(2)));
+        return new int[]{newHeight, newWidth};
+    }
+
+    /**
      * Divides the given image into smaller sub-images and calculates the average grayscale value
      * for each sub-image.
      *
@@ -46,7 +58,7 @@ public class ImageParser {
      * @param resolution the number of sub-images per dimension
      * @return a 2D array containing the grayscale values of the sub-images
      */
-    public static double[][] getImageParts(Image image, int resolution) {
+    public static double[][] extractSubImageGrayscale(Image image, int resolution) {
         double[][] subImagesGrayScale = new double[resolution][resolution];
         int subImageSize = image.getWidth() / resolution;
 

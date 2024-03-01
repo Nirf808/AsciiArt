@@ -21,7 +21,7 @@ public class TestImageParser {
     public static void testSubImageGrayScale() throws IOException {
         Image im = new Image("cat.jpeg");
         Image paddedIm = ImageParser.padImage(im);
-        double[][] grays = ImageParser.getImageParts(paddedIm, 128);
+        double[][] grays = ImageParser.extractSubImageGrayscale(paddedIm, 128);
         assert grays.length == 128;
         assert grays[0].length == 128;
 

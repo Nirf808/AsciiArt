@@ -170,7 +170,6 @@ public class Shell {
     private void changeResolution(String[] args) throws IllegalArgumentException{
         if (args.length != 2 || (!args[1].equals("up") && !args[1].equals("down"))){
             throw new IllegalArgumentException(RES_INCORRECT_FORMAT);
-
         }
         switch (args[1]){
             case "up":
