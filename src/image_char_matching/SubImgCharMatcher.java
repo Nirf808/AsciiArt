@@ -137,10 +137,12 @@ public class SubImgCharMatcher {
                 charsBrightness.remove(charBrightness);
                 //checks if min or max need to be updated
                 if(charBrightness == min_brightness) {
-                    min_brightness = (charsBrightness.isEmpty()) ? Integer.MAX_VALUE :charsBrightness.firstKey();
+                    min_brightness =
+                            (charsBrightness.isEmpty()) ? Integer.MAX_VALUE :charsBrightness.firstKey();
                 }
                 if(charBrightness == max_brightness) {
-                    max_brightness = (charsBrightness.isEmpty()) ? Integer.MIN_VALUE :charsBrightness.lastKey();
+                    max_brightness =
+                            (charsBrightness.isEmpty()) ? Integer.MIN_VALUE :charsBrightness.lastKey();
                 }
             }
         }

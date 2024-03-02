@@ -16,6 +16,11 @@ public class Image {
     private final int width;
     private final int height;
 
+    /**
+     * constracts an image from a path to an image
+     * @param filename path to image
+     * @throws IOException if there was an error while opening the image like bad path or file
+     */
     public Image(String filename) throws IOException {
         BufferedImage im = ImageIO.read(new File(filename));
         width = im.getWidth();
@@ -30,24 +35,48 @@ public class Image {
         }
     }
 
+    /**
+     * creates an image from 2d array of colors
+     * @param pixelArray array to turn to image
+     * @param width
+     * @param height
+     */
     public Image(Color[][] pixelArray, int width, int height) {
         this.pixelArray = pixelArray;
         this.width = width;
         this.height = height;
     }
 
+    /**
+     * gets image with
+     * @return
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * gets image height
+     * @return
+     */
     public int getHeight() {
         return height;
     }
 
+    /**
+     * gets the pixel in coordinate (x,y)
+     * @param x
+     * @param y
+     * @return
+     */
     public Color getPixel(int x, int y) {
         return pixelArray[x][y];
     }
 
+    /**
+     * saves an image object as jpeg image in given path
+     * @param fileName path to save image
+     */
     public void saveImage(String fileName){
         // Initialize BufferedImage, assuming Color[][] is already properly populated.
         BufferedImage bufferedImage = new BufferedImage(pixelArray[0].length, pixelArray.length,

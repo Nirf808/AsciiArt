@@ -13,8 +13,9 @@ import java.util.function.Consumer;
 
 /**
  * The Shell class represents a command-line shell for interacting with ASCII art generation functionalities.
- * It allows users to perform various operations such as changing characters used for rendering, adjusting image resolution,
- * loading different images, selecting output formats, and generating ASCII art from images.
+ * It allows users to perform various operations such as changing characters used for rendering,
+ * adjusting image resolution, loading different images, selecting output formats,
+ * and generating ASCII art from images.
  */
 public class Shell {
     private static final String EXIT = "exit";
@@ -43,10 +44,10 @@ public class Shell {
     private static final int LAST_PRINTABLE_CHAR = 126;
 
     private final AsciiOutput CONSOLE_OUTPUT = new ConsoleAsciiOutput(); //single instance of console output
-    private final AsciiOutput HTML_OUTPUT = new HtmlAsciiOutput("out.html", "Courier New"); // single
-    // instance of html output
+    private final AsciiOutput HTML_OUTPUT = new HtmlAsciiOutput("out.html", "Courier New");
+    // single instance of html output
 
-    private SubImgCharMatcher charMatcher;
+    private final SubImgCharMatcher charMatcher;
     private int resolution = DEFAULT_RESOLUTION;
     private Image image;
     private AsciiOutput output;
@@ -78,10 +79,11 @@ public class Shell {
     }
 
     /**
-     * Runs the shell, allowing users to interact with ASCII art generation functionalities through command-line inputs.
-     * It reads user input until the 'exit' command is entered.
-     * Supports commands for displaying characters, adding or removing characters from the character set,
-     * changing image resolution, loading different images, selecting output formats, and generating ASCII art from images.
+     * Runs the shell, allowing users to interact with ASCII art generation functionalities through
+     * command-line inputs. It reads user input until the 'exit' command is entered.
+     * Support commands for displaying characters, adding or removing characters from the character set,
+     * changing image resolution, loading different images, selecting output formats,
+     * and generating ASCII art from images.
      */
     public void run() {
         System.out.print(">>> ");
@@ -135,7 +137,8 @@ public class Shell {
         System.out.println();
     }
 
-    private void changeChar(String[] args, Consumer<Character> f, String err_msg) throws IllegalArgumentException {
+    private void changeChar(String[] args, Consumer<Character> f, String err_msg)
+            throws IllegalArgumentException {
         if (args.length != 2) {
             throw new IllegalArgumentException(err_msg);
         }
