@@ -15,6 +15,9 @@ public class CharConverter {
     private static final double X_OFFSET_FACTOR = 0.2;
     private static final double Y_OFFSET_FACTOR = 0.75;
     private static final String FONT_NAME = "Courier New";
+    /**
+     * default size of char image
+     */
     public static final int DEFAULT_PIXEL_RESOLUTION = 16;
 
     /**

@@ -224,6 +224,7 @@ public class Shell {
     }
 
     private int chooseNewImageResolution() {
+        //TODO rewrite
         int maxImageRes = Math.min(imageWidth(), imageHeight());
         return Math.min(DEFAULT_RESOLUTION, maxImageRes);
     }
