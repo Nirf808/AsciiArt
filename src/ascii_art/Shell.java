@@ -8,7 +8,7 @@ import image.ImageParser;
 import image_char_matching.SubImgCharMatcher;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 /**
@@ -27,14 +27,14 @@ public class Shell {
     private static final String OUTPUT = "output";
     private static final String ASCII_ART = "asciiArt";
     private static final String ADD_ERR_MSG = "Did not add due to incorrect format.";
-    private static final String REMOVE_ERR_MSG = "Did not remove due to incorrect format";
+    private static final String REMOVE_ERR_MSG = "Did not remove due to incorrect format.";
     private static final String RES_INCORRECT_FORMAT = "Did not change resolution due to incorrect format.";
     private static final String RES_EXCEEDED_BOUNDARIES = "Did not change resolution due to exceeding " +
             "boundaries.";
     private static final String RESOLUTION_CHANGED_MSG = "Resolution set to <?>.";
     private static final String IMAGE_ERR = "Did not execute due to problem with image file.";
     private static final String OUTPUT_ERR = "Did not change output method due to incorrect format.";
-    private static final String EMPTY_CHARS_ERR = " Did not execute. Charset is empty.";
+    private static final String EMPTY_CHARS_ERR = "Did not execute. Charset is empty.";
     private static final String COMMAND_NOT_FOUND_ERR = "Did not execute due to incorrect command.";
 
     private static final char[] DEFAULT_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -42,6 +42,14 @@ public class Shell {
     private static final int DEFAULT_RESOLUTION = 128;
     private static final int FIRST_PRINTABLE_CHAR = 32;
     private static final int LAST_PRINTABLE_CHAR = 126;
+    private static final String NEW_LINE = ">>> ";
+    private static final String CONSOLE_OUT = "console";
+    private static final String HTML_OUT = "html";
+    private static final String RES_UP = "up";
+    private static final String RES_DOWN = "down";
+    private static final String ALL_CHARS = "all";
+    private static final String SPACE_CHAR =  "space";
+
 
     private final AsciiOutput CONSOLE_OUTPUT = new ConsoleAsciiOutput(); //single instance of console output
     private final AsciiOutput HTML_OUTPUT = new HtmlAsciiOutput("out.html", "Courier New");
@@ -52,25 +60,17 @@ public class Shell {
     private Image image;
     private AsciiOutput output;
     private char[][] imageAsAscii;
-    private AsciiArtAlgorithm asciiArtAlgorithm;
-
-    // these three attributes help to determine which parts of the asciiArt algorithm have to be run
-    private boolean imageChanged;
-    private int lastRunResolution;
-    private Set<Character> lastUsedChars;
+    private HashMap<Integer, AsciiArtAlgorithm> algoMap;
 
     /**
      * Constructs a new Shell instance with default settings.
      * It initializes the image, character set, and output method.
      */
     public Shell() {
-        lastUsedChars = null;
-        asciiArtAlgorithm = null;
         imageAsAscii = null;
-        lastRunResolution = 0;
-        imageChanged = true;
         output = CONSOLE_OUTPUT;
         charMatcher = new SubImgCharMatcher(DEFAULT_CHARS);
+        algoMap = new HashMap<>();
         try {
             image = new Image(DEFAULT_IMAGE_NAME);
         } catch (IOException e) {
@@ -86,7 +86,7 @@ public class Shell {
      * and generating ASCII art from images.
      */
     public void run() {
-        System.out.print(">>> ");
+        System.out.print(NEW_LINE);
         String userInput = KeyboardInput.readLine();
         while (notExit(userInput)) {
             String[] commandAndArgs = userInput.split(" ");
@@ -121,7 +121,7 @@ public class Shell {
             } catch (IllegalArgumentException | IllegalStateException | IOException e) {
                 System.out.println(e.getMessage());
             }
-            System.out.print(">>> ");
+            System.out.print(NEW_LINE);
             userInput = KeyboardInput.readLine();
         }
     }
@@ -145,12 +145,12 @@ public class Shell {
 
         String arg = args[1];
         switch (arg) {
-            case "all":
+            case ALL_CHARS:
                 for (char c : getAllPossibleChars()) {
                     f.accept(c);
                 }
                 break;
-            case "space":
+            case SPACE_CHAR:
                 f.accept(' ');
                 break;
             default:
@@ -184,17 +184,17 @@ public class Shell {
     }
 
     private void changeResolution(String[] args) throws IllegalArgumentException {
-        if (args.length != 2 || (!args[1].equals("up") && !args[1].equals("down"))) {
+        if (args.length != 2 || (!args[1].equals(RES_UP) && !args[1].equals(RES_DOWN))) {
             throw new IllegalArgumentException(RES_INCORRECT_FORMAT);
         }
         switch (args[1]) {
-            case "up":
+            case RES_UP:
                 if (2 * resolution > imageWidth() || 2 * resolution > imageHeight()) {
                     throw new IllegalArgumentException(RES_EXCEEDED_BOUNDARIES);
                 }
                 resolution *= 2;
                 break;
-            case "down":
+            case RES_DOWN:
                 if (resolution / 2 < getMinCharsInRow()) {
                     throw new IllegalArgumentException(RES_EXCEEDED_BOUNDARIES);
                 }
@@ -215,19 +215,12 @@ public class Shell {
         String path = args[1];
         try {
             image = new Image(path);
-            imageChanged = true;
-            resolution = chooseNewImageResolution(); //return to default
-            // (or max if smaller than default) when an image is changed
+            algoMap = new HashMap<>();
         } catch (IOException e) {
             throw new IOException(IMAGE_ERR);
         }
     }
 
-    private int chooseNewImageResolution() {
-        //TODO rewrite
-        int maxImageRes = Math.min(imageWidth(), imageHeight());
-        return Math.min(DEFAULT_RESOLUTION, maxImageRes);
-    }
 
     private int imageHeight() {
         return ImageParser.getPaddedImageSize(image)[0];
@@ -238,14 +231,14 @@ public class Shell {
     }
 
     private void changeOutput(String[] args) throws IllegalArgumentException {
-        if (args.length != 2 || (!args[1].equals("html") && !args[1].equals("console"))) {
+        if (args.length != 2 || (!args[1].equals(HTML_OUT) && !args[1].equals(CONSOLE_OUT))) {
             throw new IllegalArgumentException(OUTPUT_ERR);
         }
         switch (args[1]) {
-            case "console":
+            case CONSOLE_OUT:
                 output = CONSOLE_OUTPUT;
                 break;
-            case "html":
+            case HTML_OUT:
                 output = HTML_OUTPUT;
                 break;
         }
@@ -264,29 +257,14 @@ public class Shell {
         if (charMatcher.getChars().isEmpty()) {
             throw new IllegalStateException(EMPTY_CHARS_ERR);
         }
-
-        if (imageChanged || resChanged()) {
-            asciiArtAlgorithm = new AsciiArtAlgorithm(image, resolution, charMatcher);
-            imageAsAscii = asciiArtAlgorithm.run();
-
-            lastRunResolution = resolution;
-            imageChanged = false;
-            lastUsedChars = charMatcher.getChars();
+        if (algoMap.containsKey(resolution)){
+            imageAsAscii = algoMap.get(resolution).run();
         } else {
-            if (charsChanged()) {
-                imageAsAscii = asciiArtAlgorithm.run();
-                lastUsedChars = charMatcher.getChars();
-            }
+            AsciiArtAlgorithm algo = new AsciiArtAlgorithm(image, resolution, charMatcher);
+            algoMap.put(resolution, algo);
+            imageAsAscii = algo.run();
         }
         output.out(imageAsAscii);
-    }
-
-    private boolean charsChanged() {
-        return !charMatcher.getChars().equals(lastUsedChars);
-    }
-
-    private boolean resChanged() {
-        return lastRunResolution != resolution;
     }
 
     /**
